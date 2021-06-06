@@ -53,9 +53,8 @@ class ChannelSearch:
     def main(self):
         self.GetChannelMovie()
         self.GetLiveArchive()
+        print(self.livemovielist)
 
 if __name__ == '__main__':
     cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
     cs.main()
-    print(cs.movielist)
-    print(cs.livemovielist)
