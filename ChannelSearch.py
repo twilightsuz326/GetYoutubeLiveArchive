@@ -9,12 +9,13 @@
 
 import json
 import datetime
+from APIKEY import *
 
 from googleapiclient.discovery import build
 
 
 class ChannelSearch:
-    def __init__(self, APIKEY, CHANNELID):
+    def __init__(self, CHANNELID):
         self.APIKEY = APIKEY
         self.CHANNELID = CHANNELID
         self.movielist = []
@@ -54,8 +55,7 @@ class ChannelSearch:
         self.GetLiveArchive()
 
 if __name__ == '__main__':
-    APIKEY = ""
-    cs = ChannelSearch(APIKEY, "UCHog7L3CzsDg2GH9aza1bPg")
+    cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
     cs.main()
     print(cs.movielist)
     print(cs.livemovielist)
