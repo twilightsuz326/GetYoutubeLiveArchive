@@ -31,7 +31,7 @@ class ChannelSearch:
         response = self.youtube.search().list(
             part = "snippet",
             channelId = self.CHANNELID,
-            maxResults = 10,
+            maxResults = 25,
             order = "date" #日付順にソート
             ).execute()
         
@@ -53,7 +53,6 @@ class ChannelSearch:
     def main(self):
         self.GetChannelMovie()
         self.GetLiveArchive()
-        print(self.livemovielist)
 
 if __name__ == '__main__':
     cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
