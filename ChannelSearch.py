@@ -9,35 +9,52 @@
 
 import json
 import datetime
-from APIKEY import *
+from GetYoutubeLiveArchive.APIKEY import *
 
 from googleapiclient.discovery import build
+from googleapiclient.errors import *
 
 
 class ChannelSearch:
     def __init__(self, CHANNELID):
-        self.APIKEY = APIKEY
+        self.key = 0
+        self.APIKEY = APIKEY[0]
         self.CHANNELID = CHANNELID
         self.movielist = []
         self.livemovielist = []
+        self.rebuild()
+        #self.youtube = self.rebuild()
 
+    def rebuild(self):
+        self.APIKEY = APIKEY[self.key]
         self.youtube = build(
             "youtube", 
             "v3", 
             developerKey=self.APIKEY
         )
+        self.key += 1
 
     def GetChannelMovie(self):
-        response = self.youtube.search().list(
-            part = "snippet",
-            channelId = self.CHANNELID,
-            maxResults = 25,
-            order = "date" #日付順にソート
+        try:
+            response = self.youtube.search().list(
+                part = "snippet",
+                channelId = self.CHANNELID,
+                maxResults = 25,
+                order = "date" #日付順にソート
             ).execute()
+        except HttpError as g:
+            print("★API KEY ERROR!★")
+            if len(self.APIKEY) -1 > self.key:
+                self.rebuild()
+                self.GetChannelMovie()
+            else:
+                print("APIKEYないからおわり")
+                raise Exception('NO APIKEY', 'eggs')
         
         for item in response.get("items", []):
             if "none" == item["snippet"]["liveBroadcastContent"]:
-                self.movielist.append(item["id"]["videoId"])
+                if "videoId" in item["id"]:
+                    self.movielist.append(item["id"]["videoId"])
 
     def GetLiveArchive(self):
         response = self.youtube.videos().list(
@@ -57,3 +74,4 @@ class ChannelSearch:
 if __name__ == '__main__':
     cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
     cs.main()
+    print(cs.movielist)
