@@ -7,6 +7,7 @@
 
 # -*- coding: utf-8 -*-
 
+import os
 import json
 import datetime
 from GetYoutubeLiveArchive.APIKEY import *
@@ -16,8 +17,8 @@ from googleapiclient.errors import *
 
 
 class ChannelSearch:
-    def __init__(self, CHANNELID):
-        self.key = 0
+    def __init__(self, CHANNELID, key=0):
+        self.key = readkey()
         self.APIKEY = APIKEY[0]
         self.CHANNELID = CHANNELID
         self.movielist = []
@@ -32,24 +33,14 @@ class ChannelSearch:
             "v3", 
             developerKey=self.APIKEY
         )
-        self.key += 1
 
     def GetChannelMovie(self):
-        try:
-            response = self.youtube.search().list(
-                part = "snippet",
-                channelId = self.CHANNELID,
-                maxResults = 25,
-                order = "date" #日付順にソート
-            ).execute()
-        except HttpError as g:
-            print("★API KEY ERROR!★")
-            if len(self.APIKEY) -1 > self.key:
-                self.rebuild()
-                self.GetChannelMovie()
-            else:
-                print("APIKEYないからおわり")
-                raise Exception('NO APIKEY', 'eggs')
+        response = self.youtube.search().list(
+            part = "snippet",
+            channelId = self.CHANNELID,
+            maxResults = 7,
+            order = "date" #日付順にソート
+        ).execute()
         
         for item in response.get("items", []):
             if "none" == item["snippet"]["liveBroadcastContent"]:
@@ -68,8 +59,33 @@ class ChannelSearch:
                     self.livemovielist.append(item["id"])
 
     def main(self):
-        self.GetChannelMovie()
-        self.GetLiveArchive()
+        try:
+            self.GetChannelMovie()
+            self.GetLiveArchive()
+        except HttpError as g:
+            print("★API KEY ERROR!★ => {}".format(self.key +1))
+            if len(self.APIKEY) -1 > self.key:
+                self.key += 1
+                writekey(self.key)
+                self.rebuild()
+                self.main()
+                return
+            else:
+                print("APIKEYないからおわり")
+                raise Exception('NO APIKEY', 'eggs')
+
+def readkey():
+    if(os.path.isfile('key.txt')):
+        with open('key.txt') as f:
+            k = f.read()
+        return int(k)
+    else:
+        writekey(0)
+        return 0
+
+def writekey(key):
+    with open('key.txt','w', newline='', encoding="utf_8") as f:
+        f.write(str(key))
 
 if __name__ == '__main__':
     cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
