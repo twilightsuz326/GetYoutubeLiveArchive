@@ -54,8 +54,10 @@ class ChannelSearch:
             part= 'snippet,contentDetails',
             id=self.CHANNELID,
         ).execute()
-
-        self.country = response["items"][0]["snippet"]["country"]
+        if "country" in response["items"][0]["snippet"]:
+            self.country = response["items"][0]["snippet"]["country"]
+        else:
+            self.country = "unknown"
 
     def GetLiveArchive(self):
         response = self.youtube.videos().list(
