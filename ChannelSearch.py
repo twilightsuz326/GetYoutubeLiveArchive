@@ -23,6 +23,7 @@ class ChannelSearch:
         self.CHANNELID = CHANNELID
         self.movielist = []
         self.livemovielist = []
+        self.country = ""
         self.rebuild()
         #self.youtube = self.rebuild()
 
@@ -41,11 +42,20 @@ class ChannelSearch:
             maxResults = 7,
             order = "date" #日付順にソート
         ).execute()
-        
+
+        self.region = response["regionCode"]
         for item in response.get("items", []):
             if "none" == item["snippet"]["liveBroadcastContent"]:
                 if "videoId" in item["id"]:
                     self.movielist.append(item["id"]["videoId"])
+
+    def GetCountry(self):
+        response = self.youtube.channels().list(
+            part= 'snippet,contentDetails',
+            id=self.CHANNELID,
+        ).execute()
+
+        self.country = response["items"][0]["snippet"]["country"]
 
     def GetLiveArchive(self):
         response = self.youtube.videos().list(
@@ -60,6 +70,7 @@ class ChannelSearch:
 
     def main(self):
         try:
+            self.GetCountry()
             self.GetChannelMovie()
             self.GetLiveArchive()
         except HttpError as g:
@@ -88,6 +99,6 @@ def writekey(key):
         f.write(str(key))
 
 if __name__ == '__main__':
-    cs = ChannelSearch("UCHog7L3CzsDg2GH9aza1bPg")
+    cs = ChannelSearch("UCWKODoiwSuLNSXIKuKnuQTQ")
     cs.main()
     print(cs.movielist)
